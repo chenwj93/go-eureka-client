@@ -9,9 +9,9 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"strconv"
 	"sync"
 	"time"
-	"strconv"
 )
 
 // Errors introduced by handling requests
@@ -42,31 +42,31 @@ type Port struct {
 	Enabled bool `xml:"enabled,attr" json:"@enabled"`
 }
 type InstanceInfo struct {
-	HostName                      string            `xml:"hostName" json:"hostName"`
-	HomePageUrl                   string            `xml:"homePageUrl,omitempty" json:"homePageUrl,omitempty"`
-	StatusPageUrl                 string            `xml:"statusPageUrl" json:"statusPageUrl"`
-	HealthCheckUrl                string            `xml:"healthCheckUrl,omitempty" json:"healthCheckUrl,omitempty"`
-	App                           string            `xml:"app" json:"app"`
-	IpAddr                        string            `xml:"ipAddr" json:"ipAddr"`
-	VipAddress                    string            `xml:"vipAddress" json:"vipAddress"`
-	secureVipAddress              string            `xml:"secureVipAddress,omitempty" json:"secureVipAddress,omitempty"`
-	Status                        string            `xml:"status" json:"status"`
-	Port                          *Port             `xml:"port,omitempty" json:"port,omitempty"`
-	SecurePort                    *Port             `xml:"securePort,omitempty" json:"securePort,omitempty"`
-	DataCenterInfo                *DataCenterInfo   `xml:"dataCenterInfo" json:"dataCenterInfo"`
-	LeaseInfo                     *LeaseInfo        `xml:"leaseInfo,omitempty" json:"leaseInfo,omitempty"`
-	Metadata                      *MetaData         `xml:"metadata,omitempty" json:"metadata,omitempty"`
-	IsCoordinatingDiscoveryServer bool              `xml:"isCoordinatingDiscoveryServer,omitempty" json:"isCoordinatingDiscoveryServer,omitempty"`
-	LastUpdatedTimestamp          int               `xml:"lastUpdatedTimestamp,omitempty" json:"lastUpdatedTimestamp,omitempty"`
-	LastDirtyTimestamp            int               `xml:"lastDirtyTimestamp,omitempty" json:"lastDirtyTimestamp,omitempty"`
-	ActionType                    string            `xml:"actionType,omitempty" json:"actionType,omitempty"`
-	Overriddenstatus              string            `xml:"overriddenstatus,omitempty" json:"overriddenstatus,omitempty"`
-	CountryId                     int               `xml:"countryId,omitempty" json:"countryId,omitempty"`
-
+	InstanceId					  string		  `xml:"instanceId" json:"instanceId"`
+	HostName                      string          `xml:"hostName" json:"hostName"`
+	HomePageUrl                   string          `xml:"homePageUrl,omitempty" json:"homePageUrl,omitempty"`
+	StatusPageUrl                 string          `xml:"statusPageUrl" json:"statusPageUrl"`
+	HealthCheckUrl                string          `xml:"healthCheckUrl,omitempty" json:"healthCheckUrl,omitempty"`
+	App                           string          `xml:"app" json:"app"`
+	IpAddr                        string          `xml:"ipAddr" json:"ipAddr"`
+	VipAddress                    string          `xml:"vipAddress" json:"vipAddress"`
+	secureVipAddress              string          `xml:"secureVipAddress,omitempty" json:"secureVipAddress,omitempty"`
+	Status                        string          `xml:"status" json:"status"`
+	Port                          *Port           `xml:"port,omitempty" json:"port,omitempty"`
+	SecurePort                    *Port           `xml:"securePort,omitempty" json:"securePort,omitempty"`
+	DataCenterInfo                *DataCenterInfo `xml:"dataCenterInfo" json:"dataCenterInfo"`
+	LeaseInfo                     *LeaseInfo      `xml:"leaseInfo,omitempty" json:"leaseInfo,omitempty"`
+	Metadata                      *MetaData       `xml:"metadata,omitempty" json:"metadata,omitempty"`
+	IsCoordinatingDiscoveryServer bool            `xml:"isCoordinatingDiscoveryServer,omitempty" json:"isCoordinatingDiscoveryServer,omitempty"`
+	LastUpdatedTimestamp          int             `xml:"lastUpdatedTimestamp,omitempty" json:"lastUpdatedTimestamp,omitempty"`
+	LastDirtyTimestamp            int             `xml:"lastDirtyTimestamp,omitempty" json:"lastDirtyTimestamp,omitempty"`
+	ActionType                    string          `xml:"actionType,omitempty" json:"actionType,omitempty"`
+	Overriddenstatus              string          `xml:"overriddenstatus,omitempty" json:"overriddenstatus,omitempty"`
+	CountryId                     int             `xml:"countryId,omitempty" json:"countryId,omitempty"`
 }
 type DataCenterInfo struct {
-	Name     string             `xml:"name" json:"name"`
-	Class    string             `xml:"class,attr" json:"@class"`
+	Name     string              `xml:"name" json:"name"`
+	Class    string              `xml:"class,attr" json:"@class"`
 	Metadata *DataCenterMetadata `xml:"metadata,omitempty" json:"metadata,omitempty"`
 }
 
@@ -86,12 +86,12 @@ type DataCenterMetadata struct {
 
 type LeaseInfo struct {
 	EvictionDurationInSecs uint `xml:"evictionDurationInSecs,omitempty" json:"evictionDurationInSecs,omitempty"`
-	RenewalIntervalInSecs  int `xml:"renewalIntervalInSecs,omitempty" json:"renewalIntervalInSecs,omitempty"`
-	DurationInSecs         int `xml:"durationInSecs,omitempty" json:"durationInSecs,omitempty"`
-	RegistrationTimestamp  int `xml:"registrationTimestamp,omitempty" json:"registrationTimestamp,omitempty"`
-	LastRenewalTimestamp   int `xml:"lastRenewalTimestamp,omitempty" json:"lastRenewalTimestamp,omitempty"`
-	EvictionTimestamp      int `xml:"evictionTimestamp,omitempty" json:"evictionTimestamp,omitempty"`
-	ServiceUpTimestamp     int `xml:"serviceUpTimestamp,omitempty" json:"serviceUpTimestamp,omitempty"`
+	RenewalIntervalInSecs  int  `xml:"renewalIntervalInSecs,omitempty" json:"renewalIntervalInSecs,omitempty"`
+	DurationInSecs         int  `xml:"durationInSecs,omitempty" json:"durationInSecs,omitempty"`
+	RegistrationTimestamp  int  `xml:"registrationTimestamp,omitempty" json:"registrationTimestamp,omitempty"`
+	LastRenewalTimestamp   int  `xml:"lastRenewalTimestamp,omitempty" json:"lastRenewalTimestamp,omitempty"`
+	EvictionTimestamp      int  `xml:"evictionTimestamp,omitempty" json:"evictionTimestamp,omitempty"`
+	ServiceUpTimestamp     int  `xml:"serviceUpTimestamp,omitempty" json:"serviceUpTimestamp,omitempty"`
 }
 
 func NewRawRequest(method, relativePath string, body []byte, cancel <-chan bool) *RawRequest {
@@ -105,7 +105,7 @@ func NewRawRequest(method, relativePath string, body []byte, cancel <-chan bool)
 
 func NewInstanceInfo(hostName, app, ip string, port int, ttl uint, isSsl bool) *InstanceInfo {
 	dataCenterInfo := &DataCenterInfo{
-		Name: "MyOwn",
+		Name:     "MyOwn",
 		Class:    "com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
 		Metadata: nil,
 	}
@@ -113,6 +113,7 @@ func NewInstanceInfo(hostName, app, ip string, port int, ttl uint, isSsl bool) *
 		EvictionDurationInSecs: ttl,
 	}
 	instanceInfo := &InstanceInfo{
+		InstanceId:     fmt.Sprintf("%s:%s:%d", hostName, app, port),
 		HostName:       hostName,
 		App:            app,
 		IpAddr:         ip,
@@ -122,32 +123,32 @@ func NewInstanceInfo(hostName, app, ip string, port int, ttl uint, isSsl bool) *
 		Metadata:       nil,
 	}
 	stringPort := ""
-	if (port != 80 && port != 443) {
+	if port != 80 && port != 443 {
 		stringPort = ":" + strconv.Itoa(port)
 	}
 	var protocol string = "http"
-	if (isSsl) {
+	if isSsl {
 		protocol = "https"
-		instanceInfo.secureVipAddress = protocol + "://" + hostName + stringPort
+		instanceInfo.secureVipAddress = app
 		instanceInfo.SecurePort = &Port{
-			Port: port,
+			Port:    port,
 			Enabled: true,
 		}
-	}else {
-		instanceInfo.VipAddress = protocol + "://" + hostName + stringPort
+	} else {
+		instanceInfo.VipAddress = app
 		instanceInfo.Port = &Port{
-			Port: port,
+			Port:    port,
 			Enabled: true,
 		}
 	}
 	instanceInfo.StatusPageUrl = protocol + "://" + hostName + stringPort + "/info"
+	instanceInfo.HomePageUrl = protocol + "://" + hostName + stringPort + "/"
 	return instanceInfo
 }
 
 // getCancelable issues a cancelable GET request
-func (c *Client) getCancelable(endpoint string,
-cancel <-chan bool) (*RawResponse, error) {
-	logger.Debug("get %s [%s]", endpoint, c.Cluster.Leader)
+func (c *Client) getCancelable(endpoint string, cancel <-chan bool) (*RawResponse, error) {
+	//fmt.Printf("get %s [%s]\n", endpoint, c.Cluster.Leader)
 	p := endpoint
 
 	req := NewRawRequest("GET", p, nil, cancel)
@@ -168,7 +169,7 @@ func (c *Client) Get(endpoint string) (*RawResponse, error) {
 // put issues a PUT request
 func (c *Client) Put(endpoint string, body []byte) (*RawResponse, error) {
 
-	logger.Debug("put %s, %s, [%s]", endpoint, body, c.Cluster.Leader)
+	//fmt.Printf("put %s, %s, [%s]\n", endpoint, body, c.Cluster.Leader)
 	p := endpoint
 
 	req := NewRawRequest("PUT", p, body, nil)
@@ -183,7 +184,7 @@ func (c *Client) Put(endpoint string, body []byte) (*RawResponse, error) {
 
 // post issues a POST request
 func (c *Client) Post(endpoint string, body []byte) (*RawResponse, error) {
-	logger.Debug("post %s, %s, [%s]", endpoint, body, c.Cluster.Leader)
+	//fmt.Printf("post %s, %s, [%s]\n", endpoint, body, c.Cluster.Leader)
 	p := endpoint
 
 	req := NewRawRequest("POST", p, body, nil)
@@ -198,7 +199,7 @@ func (c *Client) Post(endpoint string, body []byte) (*RawResponse, error) {
 
 // delete issues a DELETE request
 func (c *Client) Delete(endpoint string) (*RawResponse, error) {
-	logger.Debug("delete %s [%s]", endpoint, c.Cluster.Leader)
+	fmt.Printf("delete %s [%s]\n", endpoint, c.Cluster.Leader)
 	p := endpoint
 
 	req := NewRawRequest("DELETE", p, nil, nil)
@@ -237,7 +238,7 @@ func (c *Client) SendRequest(rr *RawRequest) (*RawResponse, error) {
 			select {
 			case <-rr.cancel:
 				cancelled <- true
-				logger.Debug("send.request is cancelled")
+				fmt.Println("send.request is cancelled")
 			case <-cancelRoutine:
 				return
 			}
@@ -263,7 +264,7 @@ func (c *Client) SendRequest(rr *RawRequest) (*RawResponse, error) {
 	sleep := 25 * time.Millisecond
 	maxSleep := time.Second
 
-	for attempt := 0;; attempt++ {
+	for attempt := 0; ; attempt++ {
 		if attempt > 0 {
 			select {
 			case <-cancelled:
@@ -276,11 +277,11 @@ func (c *Client) SendRequest(rr *RawRequest) (*RawResponse, error) {
 			}
 		}
 
-		logger.Debug("Connecting to eureka: attempt %d for %s", attempt + 1, rr.relativePath)
+		//fmt.Printf("Connecting to eureka: attempt %d for %s\n", attempt+1, rr.relativePath)
 
 		httpPath = c.getHttpPath(false, rr.relativePath)
 
-		logger.Debug("send.request.to %s | method %s", httpPath, rr.method)
+		//fmt.Printf("send.request.to %s | method %s\n", httpPath, rr.method)
 
 		req, err := func() (*http.Request, error) {
 			reqLock.Lock()
@@ -317,7 +318,7 @@ func (c *Client) SendRequest(rr *RawRequest) (*RawResponse, error) {
 
 		// network error, change a machine!
 		if err != nil {
-			logger.Error("network error: %v", err.Error())
+			fmt.Printf("network error: %v\n", err.Error())
 			lastResp := http.Response{}
 			if checkErr := checkRetry(c.Cluster, numReqs, lastResp, err); checkErr != nil {
 				return nil, checkErr
@@ -328,13 +329,13 @@ func (c *Client) SendRequest(rr *RawRequest) (*RawResponse, error) {
 		}
 
 		// if there is no error, it should receive response
-		logger.Debug("recv.response.from "+httpPath)
+		//fmt.Println("recv.response.from " + httpPath)
 
 		if validHttpStatusCode[resp.StatusCode] {
 			// try to read byte code and break the loop
 			respBody, err = ioutil.ReadAll(resp.Body)
 			if err == nil {
-				logger.Debug("recv.success "+ httpPath)
+				//fmt.Println("recv.success " + httpPath)
 				break
 			}
 			// ReadAll error may be caused due to cancel request
@@ -359,19 +360,19 @@ func (c *Client) SendRequest(rr *RawRequest) (*RawResponse, error) {
 			u, err := resp.Location()
 
 			if err != nil {
-				logger.Warning("%v", err)
+				fmt.Printf("%v\n", err)
 			} else {
 				// Update cluster leader based on redirect location
 				// because it should point to the leader address
 				c.Cluster.updateLeaderFromURL(u)
-				logger.Debug("recv.response.relocate "+ u.String())
+				fmt.Println("recv.response.relocate " + u.String())
 			}
 			resp.Body.Close()
 			continue
 		}
 
 		if checkErr := checkRetry(c.Cluster, numReqs, *resp,
-			errors.New("Unexpected HTTP status code")); checkErr != nil {
+			errors.New("unexpected HTTP status code")); checkErr != nil {
 			return nil, checkErr
 		}
 		resp.Body.Close()
@@ -390,9 +391,9 @@ func (c *Client) SendRequest(rr *RawRequest) (*RawResponse, error) {
 // If we have retried 2 * machine number, stop retrying.
 // If status code is InternalServerError, sleep for 200ms.
 func DefaultCheckRetry(cluster *Cluster, numReqs int, lastResp http.Response,
-err error) error {
+	err error) error {
 
-	if numReqs >= 2 * len(cluster.Machines) {
+	if numReqs >= 2*len(cluster.Machines) {
 		return newError(ErrCodeEurekaNotReachable,
 			"Tried to connect to each peer twice and failed", 0)
 	}
@@ -403,7 +404,7 @@ err error) error {
 
 	}
 
-	logger.Warning("bad response status code %d", code)
+	fmt.Printf("bad response status code %d\n", code)
 	return nil
 }
 
